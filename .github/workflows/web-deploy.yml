@@ -1,0 +1,57 @@
+name: Deploy web/PWA (per tenant)
+
+# Triggered either manually (Actions tab -> Run workflow) or by
+# magic-visit-panel's "Deploy web" action, which dispatches this same event
+# via the GitHub REST API (mirrors eas-build.yml's dispatch route — see
+# magic-visit-panel/app/api/tenants/[tenantId]/deploy-web/route.ts).
+on:
+  workflow_dispatch:
+    inputs:
+      tenant_slug:
+        description: "organizations.slug of the tenant to deploy (e.g. urmil-jewellers)"
+        required: true
+      cloudflare_project:
+        description: "Cloudflare Pages project name to deploy to (created automatically on first deploy if it doesn't exist)"
+        required: true
+        default: "magic-visit-app"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Write base .env
+        # Same reasoning as eas-build.yml — EXPO_PUBLIC_* vars get inlined
+        # into the JS bundle at export time, so they need to be real env
+        # vars (or present in .env) when `expo export` runs, not just known
+        # to this workflow.
+        run: |
+          cat > .env <<EOF
+          EXPO_PUBLIC_INSTANT_APP_ID=${{ secrets.INSTANT_APP_ID }}
+          EXPO_PUBLIC_AUTH_BRIDGE_URL=${{ secrets.AUTH_BRIDGE_URL }}
+          EXPO_PUBLIC_TENANT_SLUG=${{ inputs.tenant_slug }}
+          EOF
+
+      - name: Sync tenant branding (APP_NAME / NOTIFICATION_COLOR)
+        run: node scripts/sync-tenant-branding.js
+        env:
+          EXPO_PUBLIC_AUTH_BRIDGE_URL: ${{ secrets.AUTH_BRIDGE_URL }}
+          EXPO_PUBLIC_TENANT_SLUG: ${{ inputs.tenant_slug }}
+
+      - name: Export static web build
+        # web.output is "static" in app.config.js — this produces dist/,
+        # including everything in public/ (manifest.json, icons, favicon)
+        # copied to the output root, same as a local `expo export -p web`.
+        run: bunx expo export -p web
+
+      - name: Deploy to Cloudflare Pages
+        run: bunx wrangler pages deploy dist --project-name="${{ inputs.cloudflare_project }}" --branch=main --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,0 +1,62 @@
+name: EAS Build (per tenant)
+
+# Triggered either manually (Actions tab -> Run workflow) or by
+# magic-visit-panel's "Create APK" button, which dispatches this same event
+# via the GitHub REST API (see magic-visit-panel/app/api/tenants/[tenantId]/build/route.ts).
+on:
+  workflow_dispatch:
+    inputs:
+      tenant_slug:
+        description: "organizations.slug of the tenant to build (e.g. urmil-jewellers)"
+        required: true
+      platform:
+        description: "Target platform"
+        required: true
+        default: "android"
+        type: choice
+        options: [android, ios, all]
+      profile:
+        description: "eas.json build profile"
+        required: true
+        default: "preview"
+        type: choice
+        options: [preview, production]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Write base .env
+        # EXPO_PUBLIC_* vars get inlined into the JS bundle at build time —
+        # they need to exist here (not just in process.env) because that's
+        # what Expo's own env-loading reads when `eas build` evaluates
+        # app.config.js on its remote build machine, and `.env` isn't
+        # excluded by .easignore, so it travels with the uploaded project
+        # archive.
+        run: |
+          cat > .env <<EOF
+          EXPO_PUBLIC_INSTANT_APP_ID=${{ secrets.INSTANT_APP_ID }}
+          EXPO_PUBLIC_AUTH_BRIDGE_URL=${{ secrets.AUTH_BRIDGE_URL }}
+          EXPO_PUBLIC_TENANT_SLUG=${{ inputs.tenant_slug }}
+          EOF
+
+      - name: Sync tenant branding (APP_NAME / NOTIFICATION_COLOR)
+        run: node scripts/sync-tenant-branding.js
+        env:
+          EXPO_PUBLIC_AUTH_BRIDGE_URL: ${{ secrets.AUTH_BRIDGE_URL }}
+          EXPO_PUBLIC_TENANT_SLUG: ${{ inputs.tenant_slug }}
+
+      - name: Install eas-cli
+        run: bun add -g eas-cli
+
+      - name: Build
+        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
