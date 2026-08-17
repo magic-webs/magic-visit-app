@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "563090374860",
+    "project_id": "urmil-jewellers-ramnagar",
+    "storage_bucket": "urmil-jewellers-ramnagar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563090374860:android:8b114d5b62b5422b5e4269",
+        "android_client_info": {
+          "package_name": "com.magicwebs.urmiljewellersramnagar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuREp32xijqHuLX_9AI53dedE-8Vpd_gs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
