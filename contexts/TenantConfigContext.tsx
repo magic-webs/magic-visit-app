@@ -4,6 +4,7 @@ import { fetchTenantConfig, type TenantConfigResponse } from "@/lib/tenant-confi
 import { deriveResolvedBrand, type ResolvedBrand } from "@/lib/theme/derive-brand-vars";
 import { DEFAULT_RESOLVED_BRAND, DEFAULT_BRANDING } from "@/lib/theme/default-tenant-config";
 import { applyResolvedBrandColors } from "@/constants/theme";
+import { base64ToUtf8 } from "@/lib/base64";
 
 const CACHE_KEY = "tenant_config_cache_v1";
 
@@ -44,28 +45,6 @@ function resolve(data: TenantConfigResponse): Pick<TenantConfigValue, "brand" | 
         }
       : DEFAULT_BRANDING,
   };
-}
-
-// Dependency-free base64 -> UTF-8 decode (no reliance on Buffer, which
-// isn't a JS-engine global in Hermes/React Native, or atob/escape, which
-// are inconsistently available/deprecated) — see EXPO_PUBLIC_BAKED_TENANT_CONFIG
-// below for what this decodes.
-function base64ToUtf8(base64: string): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  const bytes: number[] = [];
-  let buffer = 0;
-  let bits = 0;
-  for (const char of base64) {
-    const value = chars.indexOf(char);
-    if (value === -1) continue;
-    buffer = (buffer << 6) | value;
-    bits += 6;
-    if (bits >= 8) {
-      bits -= 8;
-      bytes.push((buffer >> bits) & 0xff);
-    }
-  }
-  return new TextDecoder().decode(new Uint8Array(bytes));
 }
 
 // EXPO_PUBLIC_BAKED_TENANT_CONFIG is written at BUILD time by

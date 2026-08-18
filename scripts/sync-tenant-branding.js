@@ -19,6 +19,8 @@ const path = require("node:path");
 
 const ENV_PATH = path.join(__dirname, "..", ".env");
 const ASSETS_DIR = path.join(__dirname, "..", "assets", "images");
+const PUBLIC_DIR = path.join(__dirname, "..", "public");
+const MANIFEST_PATH = path.join(PUBLIC_DIR, "manifest.json");
 
 const EXT_BY_CONTENT_TYPE = {
   "image/png": "png",
@@ -46,8 +48,42 @@ async function downloadTenantIcon(url) {
   fs.mkdirSync(ASSETS_DIR, { recursive: true });
   const filePath = path.join(ASSETS_DIR, `tenant-icon.${ext}`);
   fs.writeFileSync(filePath, buffer);
+
+  // web.favicon in app.config.js only feeds Expo's classic webpack build —
+  // the actual static web export (app/+html.tsx, output: "static") serves
+  // public/favicon.png etc. verbatim, completely independent of that config
+  // field. Without overwriting these too, the browser tab/PWA install icon
+  // always stays the hardcoded default no matter what a tenant uploads —
+  // this is the literal "favicon is not change" bug. Raster formats
+  // (png/jpg/webp) are safe to drop in under the existing .png filenames —
+  // browsers sniff icon bytes rather than trust the extension — but an SVG
+  // upload genuinely wouldn't render under a mismatched extension, so skip
+  // rather than serve a broken icon.
+  if (ext !== "svg") {
+    fs.writeFileSync(path.join(PUBLIC_DIR, "favicon.png"), buffer);
+    fs.writeFileSync(path.join(PUBLIC_DIR, "icon-192.png"), buffer);
+    fs.writeFileSync(path.join(PUBLIC_DIR, "icon-512.png"), buffer);
+  } else {
+    console.log("Tenant icon is an SVG — leaving public/favicon.png and friends as the default (no safe raster to drop in).");
+  }
+
   // app.config.js expects paths relative to the project root, "./assets/...".
   return `./assets/images/tenant-icon.${ext}`;
+}
+
+// public/manifest.json drives "Add to Home Screen"/PWA install — like the
+// favicon, it's a static file copied verbatim into the export output, so a
+// tenant's app name/short name/theme color need to be written into it here
+// rather than relying on any app.config.js field.
+function syncManifest({ appName, shortName, themeColorHex }) {
+  if (!fs.existsSync(MANIFEST_PATH)) return;
+  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8"));
+  if (appName) {
+    manifest.name = appName;
+    manifest.short_name = shortName || appName;
+  }
+  if (themeColorHex) manifest.theme_color = themeColorHex;
+  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + "\n");
 }
 
 function readEnvFile() {
@@ -178,6 +214,9 @@ async function main() {
   } else {
     console.log("No icon or logo uploaded for this tenant yet — ICON_PATH/FAVICON_PATH left as-is.");
   }
+
+  syncManifest({ appName: data.branding?.appName, shortName: data.branding?.shortName, themeColorHex: hex });
+  console.log("public/manifest.json synced.");
 
   // Bakes the FULL tenant config (theme + branding, same shape
   // TenantConfigContext fetches at runtime) into the JS bundle as this
