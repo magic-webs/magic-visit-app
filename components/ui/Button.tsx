@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, View, type GestureResponderEvent, type Pr
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { AppText } from "./AppText";
 import { cn } from "@/lib/cn";
+import { theme } from "@/constants/theme";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "destructive" | "destructiveOutline" | "ghost";
 
@@ -18,19 +19,33 @@ interface ButtonProps extends Omit<PressableProps, "children"> {
 // The "lip" is a solid-color layer sat behind the button face at rest, and
 // covered up on press — that's the whole Duolingo 3D trick, no shadows
 // involved. `edge` is that lip's color; `depth` is how tall it is.
-const VARIANT_STYLES: Record<ButtonVariant, { container: string; text: string; spinner: string; edge: string }> = {
-  primary: { container: "bg-brand-teal", text: "text-white", spinner: "#fff", edge: "#065c50" },
-  secondary: { container: "bg-brand-gold-200", text: "text-brand-teal", spinner: "#097969", edge: "#e8d98a" },
-  outline: { container: "border border-brand-teal bg-white", text: "text-brand-teal", spinner: "#097969", edge: "#bfe6db" },
-  destructive: { container: "bg-status-notInterested", text: "text-white", spinner: "#fff", edge: "#b91c1c" },
-  destructiveOutline: {
-    container: "border border-status-notInterested bg-white",
-    text: "text-status-notInterested",
-    spinner: "#ef4444",
-    edge: "#fecaca",
-  },
-  ghost: { container: "bg-transparent", text: "text-brand-teal", spinner: "#097969", edge: "transparent" },
-};
+//
+// A function, not a top-level object — `primary`/`secondary`/`ghost`'s
+// spinner tint and `primary`/`secondary`'s edge reference `theme.teal.*`/
+// `theme.gold.border`, which applyResolvedBrandColors() (see
+// constants/theme.ts) mutates once a tenant's brand resolves. A frozen
+// object built at import time would permanently keep the hardcoded default
+// teal edge/spinner no matter what color a tenant picks — this is called
+// fresh on every render instead. `outline`'s edge and the
+// `destructive`/`destructiveOutline` variants stay fixed (a pale wash /
+// status reds respectively) — there's no existing derived "pale tint" of
+// the tenant's primary to substitute without risking a muddy result for an
+// arbitrary hue.
+function getVariantStyles(): Record<ButtonVariant, { container: string; text: string; spinner: string; edge: string }> {
+  return {
+    primary: { container: "bg-brand-teal", text: "text-white", spinner: "#fff", edge: theme.teal.edge },
+    secondary: { container: "bg-brand-gold-200", text: "text-brand-teal", spinner: theme.teal.DEFAULT, edge: theme.gold.border },
+    outline: { container: "border border-brand-teal bg-white", text: "text-brand-teal", spinner: theme.teal.DEFAULT, edge: "#bfe6db" },
+    destructive: { container: "bg-status-notInterested", text: "text-white", spinner: "#fff", edge: "#b91c1c" },
+    destructiveOutline: {
+      container: "border border-status-notInterested bg-white",
+      text: "text-status-notInterested",
+      spinner: "#ef4444",
+      edge: "#fecaca",
+    },
+    ghost: { container: "bg-transparent", text: "text-brand-teal", spinner: theme.teal.DEFAULT, edge: "transparent" },
+  };
+}
 
 const DEPTH = 4;
 
@@ -45,7 +60,7 @@ export function Button({
   onPressOut,
   ...props
 }: ButtonProps) {
-  const styles = VARIANT_STYLES[variant];
+  const styles = getVariantStyles()[variant];
   const isDisabled = disabled || loading;
   const pressDepth = useSharedValue(0);
 

@@ -32,6 +32,18 @@ export interface ResolvedBrand {
   vars: BrandVars;
   gradientPrimary: readonly [string, string, string];
   navigation: { primary: string; background: string; border: string };
+  // The solid "lip" color sat behind a primary Button's face at rest (see
+  // components/ui/Button.tsx's own comment on the 3D-lip trick) — a plain
+  // hex, not a CSS var, because Button.tsx sets it via a plain `style`
+  // background-color, not a NativeWind class. Darkened the same way the
+  // panel's own preview derives it (magic-visit-panel/lib/theme/
+  // derive-brand-vars.ts's deriveMobileBrand), so the preview and the real
+  // app agree.
+  buttonEdge: string;
+  // Plain hex counterpart of `vars["--color-brand-gold-border"]` — for the
+  // handful of direct (non-NativeWind-class) reads of the gold border color,
+  // e.g. the Accountant role badge in constants/theme.ts's ROLE_STYLES.
+  goldBorderHex: string;
   // A CSS font-family stack (e.g. "Georgia, 'Times New Roman', serif") from
   // the panel's theme editor (lib/theme/presets.ts's FONT_OPTIONS there).
   // Only meaningfully applied on web (see app/_layout.tsx) — these are web
@@ -62,6 +74,7 @@ export function deriveResolvedBrand(base: ThemeBaseTokens, fontFamily?: string):
 
   const tealHover = lighten(primary, 0.05);
   const tealLight = lighten(primary, 0.12);
+  const edge = lighten(primary, -0.12);
   const gold = deriveGoldScale(secondary);
 
   return {
@@ -80,6 +93,8 @@ export function deriveResolvedBrand(base: ThemeBaseTokens, fontFamily?: string):
       background: oklchToHex(mixOklch(gold["50"], gold["50"], 0)),
       border: oklchToHex(gold.border),
     },
+    buttonEdge: oklchToHex(edge),
+    goldBorderHex: oklchToHex(gold.border),
     fontFamily: fontFamily || DEFAULT_FONT_FAMILY,
   };
 }

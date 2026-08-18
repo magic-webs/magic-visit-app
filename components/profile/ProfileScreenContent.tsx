@@ -14,7 +14,7 @@ import { useSession } from "@/contexts/SessionContext";
 import { useConfirmModal } from "@/contexts/ConfirmModalContext";
 import { db } from "@/lib/db";
 import { unregisterForPushNotifications } from "@/lib/push-notifications";
-import { ROLE_STYLES, theme } from "@/constants/theme";
+import { getRoleStyles, theme } from "@/constants/theme";
 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
@@ -80,7 +80,7 @@ export function ProfileScreenContent({ extraRows }: { extraRows?: ReactNode }) {
   const [changingPassword, setChangingPassword] = useState(false);
 
   const initial = profile?.name?.trim()?.charAt(0)?.toUpperCase() || "?";
-  const roleStyle = session.role ? ROLE_STYLES[session.role] : undefined;
+  const roleStyle = session.role ? getRoleStyles()[session.role] : undefined;
   const memberSince = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
     : undefined;

@@ -9,6 +9,10 @@ export const theme = {
     DEFAULT: "#097969",
     hover: "#0a9070",
     light: "#0bb885",
+    // The 3D-lip color behind a primary Button's face (see
+    // components/ui/Button.tsx) — mutated in place by
+    // applyResolvedBrandColors() below, same as the other teal shades.
+    edge: "#065c50",
   },
   gold: {
     50: "#fdf8ed",
@@ -53,10 +57,27 @@ export const theme = {
 // given how broadly it's imported by direct property access rather than via
 // props/hooks. For today's single migrated tenant this is a no-op (the
 // resolved brand starts out equal to these same hardcoded values).
-export function applyResolvedBrandColors(colors: { primary: string; hover: string; light: string }): void {
+//
+// Crucial caveat this mutation trick does NOT cover: anything that reads
+// `theme.teal.*`/`theme.gold.*` into a plain object *at module load time*
+// (e.g. a top-level `const X = { color: theme.teal.DEFAULT }`) captures
+// today's string value once and never sees later mutations — only a read
+// that happens fresh inside a function body (a render, or a function called
+// per-render) stays live. ROLE_STYLES below is built this way — as a
+// function, not a frozen object — specifically to avoid that trap; see its
+// own comment.
+export function applyResolvedBrandColors(colors: {
+  primary: string;
+  hover: string;
+  light: string;
+  edge: string;
+  goldBorder: string;
+}): void {
   theme.teal.DEFAULT = colors.primary;
   theme.teal.hover = colors.hover;
   theme.teal.light = colors.light;
+  theme.teal.edge = colors.edge;
+  theme.gold.border = colors.goldBorder;
   theme.gradients.primary[0] = colors.primary;
   theme.gradients.primary[1] = colors.hover;
   theme.gradients.primary[2] = colors.light;
@@ -92,13 +113,22 @@ export const DISCOUNT_STATUS_STYLES: Record<DiscountRequestStatus, { color: stri
 
 export type StaffRole = "owner" | "branch_manager" | "receptionist" | "salesperson" | "accountant";
 
-export const ROLE_STYLES: Record<StaffRole, { color: string; label: string }> = {
-  owner: { color: theme.teal.DEFAULT, label: "Owner" },
-  branch_manager: { color: theme.teal.hover, label: "Branch Manager" },
-  receptionist: { color: theme.status.windowShopping, label: "Receptionist" },
-  salesperson: { color: theme.status.followUp, label: "Salesperson" },
-  accountant: { color: theme.gold.border, label: "Accountant" },
-};
+// A function, not a frozen top-level object — `owner`/`branch_manager`/
+// `accountant` reference the mutable `theme.teal`/`theme.gold` shades (see
+// applyResolvedBrandColors' comment above on why a plain object here would
+// permanently freeze in whatever tenant happened to be active at module
+// load, usually the hardcoded default). Called fresh inside each consumer's
+// render (see components/identity/RoleBadge.tsx) so it always reflects the
+// signed-in tenant's current brand.
+export function getRoleStyles(): Record<StaffRole, { color: string; label: string }> {
+  return {
+    owner: { color: theme.teal.DEFAULT, label: "Owner" },
+    branch_manager: { color: theme.teal.hover, label: "Branch Manager" },
+    receptionist: { color: theme.status.windowShopping, label: "Receptionist" },
+    salesperson: { color: theme.status.followUp, label: "Salesperson" },
+    accountant: { color: theme.gold.border, label: "Accountant" },
+  };
+}
 
 const fonts: Theme["fonts"] = {
   regular: { fontFamily: "Inter_400Regular", fontWeight: "400" },

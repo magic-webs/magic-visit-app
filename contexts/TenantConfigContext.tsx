@@ -30,7 +30,13 @@ function resolve(data: TenantConfigResponse): Pick<TenantConfigValue, "brand" | 
   // keeps the ~25 call sites that read theme.teal/theme.gradients.primary
   // directly (not via a Tailwind class) in sync with whatever this tenant's
   // theme resolves to.
-  applyResolvedBrandColors({ primary: brand.navigation.primary, hover: brand.gradientPrimary[1], light: brand.gradientPrimary[2] });
+  applyResolvedBrandColors({
+    primary: brand.navigation.primary,
+    hover: brand.gradientPrimary[1],
+    light: brand.gradientPrimary[2],
+    edge: brand.buttonEdge,
+    goldBorder: brand.goldBorderHex,
+  });
 
   return {
     brand,
