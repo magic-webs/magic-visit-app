@@ -46,3 +46,8 @@ app-example
 
 urmil-jewellers-ramnagar.code-workspace
 .code-workspace
+
+# Generated per-build by scripts/sync-tenant-branding.js — a tenant's
+# downloaded icon/logo, never something to commit (it's whatever the last
+# local build happened to sync).
+assets/images/tenant-icon.*

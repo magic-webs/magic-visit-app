@@ -1,5 +1,9 @@
 name: Deploy web/PWA (per tenant)
 
+# See eas-build.yml's run-name comment — same mechanism, same parsing
+# contract with the Export page's runs route.
+run-name: "${{ inputs.tenant_slug }} — web/${{ inputs.cloudflare_project }}"
+
 # Triggered either manually (Actions tab -> Run workflow) or by
 # magic-visit-panel's "Deploy web" action, which dispatches this same event
 # via the GitHub REST API (mirrors eas-build.yml's dispatch route — see

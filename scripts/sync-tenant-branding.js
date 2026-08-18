@@ -18,6 +18,37 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ENV_PATH = path.join(__dirname, "..", ".env");
+const ASSETS_DIR = path.join(__dirname, "..", "assets", "images");
+
+const EXT_BY_CONTENT_TYPE = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/webp": "webp",
+  "image/svg+xml": "svg",
+};
+
+// app.config.js's ICON_PATH/ADAPTIVE_ICON_PATH/FAVICON_PATH need real LOCAL
+// files — Expo's build pipeline actually processes/resizes them — but a
+// tenant's uploaded icon/logo only exists as a remote InstantDB $files URL.
+// Without this, those fields always fall back to the hardcoded default
+// icon regardless of what a tenant uploaded in the panel, which is the
+// exact "favicon is the default, not the one I selected" bug. Downloads the
+// tenant's icon (falling back to their light logo if no dedicated icon was
+// uploaded) to a local file once per build, so app.config.js can point at
+// it like any other asset.
+async function downloadTenantIcon(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Icon download failed (${res.status})`);
+  const contentType = (res.headers.get("content-type") || "").split(";")[0].trim();
+  const ext = EXT_BY_CONTENT_TYPE[contentType] || "png";
+  const buffer = Buffer.from(await res.arrayBuffer());
+  fs.mkdirSync(ASSETS_DIR, { recursive: true });
+  const filePath = path.join(ASSETS_DIR, `tenant-icon.${ext}`);
+  fs.writeFileSync(filePath, buffer);
+  // app.config.js expects paths relative to the project root, "./assets/...".
+  return `./assets/images/tenant-icon.${ext}`;
+}
 
 function readEnvFile() {
   if (!fs.existsSync(ENV_PATH)) return { text: "", values: {} };
@@ -130,6 +161,22 @@ async function main() {
     console.log(`NOTIFICATION_COLOR=${hex}`);
   } else {
     console.log("No theme configured for this tenant yet — NOTIFICATION_COLOR left as-is.");
+  }
+
+  const iconSourceUrl = data.branding?.iconUrl || data.branding?.logoLightUrl;
+  if (iconSourceUrl) {
+    try {
+      const iconPath = await downloadTenantIcon(iconSourceUrl);
+      next = upsertEnvVar(next, "ICON_PATH", iconPath);
+      next = upsertEnvVar(next, "ADAPTIVE_ICON_PATH", iconPath);
+      next = upsertEnvVar(next, "FAVICON_PATH", iconPath);
+      changed = true;
+      console.log(`ICON_PATH=ADAPTIVE_ICON_PATH=FAVICON_PATH=${iconPath} (downloaded from ${iconSourceUrl})`);
+    } catch (err) {
+      console.error(`Icon download failed, leaving ICON_PATH/FAVICON_PATH as-is: ${err.message}`);
+    }
+  } else {
+    console.log("No icon or logo uploaded for this tenant yet — ICON_PATH/FAVICON_PATH left as-is.");
   }
 
   // Bakes the FULL tenant config (theme + branding, same shape

@@ -10,7 +10,8 @@ import {
 // @react-navigation/native directly trips a hard compatibility guard.
 import { Stack, ThemeProvider } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
+import { useEffect } from "react";
+import { Platform, View } from "react-native";
 import { vars } from "nativewind";
 import "react-native-reanimated";
 
@@ -45,6 +46,23 @@ export default function RootLayout() {
 // login screen, which needs the tenant's logo/name before anyone signs in).
 function ThemedRoot() {
   const { brand } = useTenantConfig();
+
+  // Web only — `theme.font` (see lib/theme/presets.ts's FONT_OPTIONS in the
+  // panel) is a CSS font stack, not a real React Native font family name,
+  // so it can only be honored on the web build; native font selection
+  // would need actual bundled font files per choice, which isn't built
+  // yet. `!important` + a broad selector is deliberate: NativeWind compiles
+  // `font-sans`/`font-sans-medium`/etc. into their own font-family
+  // declarations with normal specificity, and this has to reliably beat
+  // all of them, not just set an inherited default that they'd override.
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof document === "undefined") return;
+    const styleEl = document.createElement("style");
+    styleEl.setAttribute("data-tenant-font", "true");
+    styleEl.textContent = `html, body, [class*="font-sans"] { font-family: ${brand.fontFamily} !important; }`;
+    document.head.appendChild(styleEl);
+    return () => styleEl.remove();
+  }, [brand.fontFamily]);
 
   return (
     // `vars(...)` turns the resolved brand colors into CSS custom properties

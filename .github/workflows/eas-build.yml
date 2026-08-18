@@ -1,5 +1,13 @@
 name: EAS Build (per tenant)
 
+# GitHub's runs API doesn't expose workflow_dispatch input values anywhere
+# filterable, EXCEPT via this run-name, which becomes each run's
+# `display_title` — magic-visit-panel's Export page reads that to show only
+# the runs that were actually for the tenant you're looking at (see
+# app/api/tenants/[tenantId]/export/runs/route.ts). Keep this in sync with
+# that route's parsing if you change the format.
+run-name: "${{ inputs.tenant_slug }} — ${{ inputs.platform }}/${{ inputs.profile }}"
+
 # Triggered either manually (Actions tab -> Run workflow) or by
 # magic-visit-panel's "Create APK" button, which dispatches this same event
 # via the GitHub REST API (see magic-visit-panel/app/api/tenants/[tenantId]/build/route.ts).

@@ -24,7 +24,7 @@ export interface TenantConfigValue {
 }
 
 function resolve(data: TenantConfigResponse): Pick<TenantConfigValue, "brand" | "branding"> {
-  const brand = data.theme ? deriveResolvedBrand(data.theme.light) : DEFAULT_RESOLVED_BRAND;
+  const brand = data.theme ? deriveResolvedBrand(data.theme.light, data.theme.font) : DEFAULT_RESOLVED_BRAND;
   // See constants/theme.ts's applyResolvedBrandColors doc comment — this
   // keeps the ~25 call sites that read theme.teal/theme.gradients.primary
   // directly (not via a Tailwind class) in sync with whatever this tenant's

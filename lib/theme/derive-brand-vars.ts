@@ -32,7 +32,15 @@ export interface ResolvedBrand {
   vars: BrandVars;
   gradientPrimary: readonly [string, string, string];
   navigation: { primary: string; background: string; border: string };
+  // A CSS font-family stack (e.g. "Georgia, 'Times New Roman', serif") from
+  // the panel's theme editor (lib/theme/presets.ts's FONT_OPTIONS there).
+  // Only meaningfully applied on web (see app/_layout.tsx) — these are web
+  // font stacks, not real RN font family names, and native font loading
+  // (bundling actual font files per choice) isn't built yet.
+  fontFamily: string;
 }
+
+const DEFAULT_FONT_FAMILY = "Inter, ui-sans-serif, system-ui, sans-serif";
 
 // A light neutral/gold-ish scale derived from `secondary`, sharing its hue
 // but varying lightness/chroma — solved to land close to the current
@@ -48,7 +56,7 @@ function deriveGoldScale(secondary: Oklch) {
   };
 }
 
-export function deriveResolvedBrand(base: ThemeBaseTokens): ResolvedBrand {
+export function deriveResolvedBrand(base: ThemeBaseTokens, fontFamily?: string): ResolvedBrand {
   const primary = parseOklch(base.primary);
   const secondary = parseOklch(base.secondary);
 
@@ -72,5 +80,6 @@ export function deriveResolvedBrand(base: ThemeBaseTokens): ResolvedBrand {
       background: oklchToHex(mixOklch(gold["50"], gold["50"], 0)),
       border: oklchToHex(gold.border),
     },
+    fontFamily: fontFamily || DEFAULT_FONT_FAMILY,
   };
 }

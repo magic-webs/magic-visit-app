@@ -17,6 +17,7 @@ export const DEFAULT_RESOLVED_BRAND: ResolvedBrand = {
   },
   gradientPrimary: ["#097969", "#0a9070", "#0bb885"],
   navigation: { primary: "#097969", background: "#fdf8ed", border: "#e8d98a" },
+  fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
 };
 
 export const DEFAULT_BRANDING = {
