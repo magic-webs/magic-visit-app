@@ -20,7 +20,7 @@ npm run deploy   # wrangler deploy --minify
 
 This gives you a URL like `https://magic-visit-auth-bridge.<your-subdomain>.workers.dev` (or a custom domain if configured) — that's the value used as `AUTH_BRIDGE_URL` below.
 
-## 1. GitHub repo secrets (`magic-webs/uj-ramnagar-mobile` → Settings → Secrets and variables → Actions)
+## 1. GitHub repo secrets (`magic-webs/magic-visit-app` → Settings → Secrets and variables → Actions)
 
 | Secret | Used by | Value |
 |---|---|---|
@@ -34,8 +34,8 @@ This gives you a URL like `https://magic-visit-auth-bridge.<your-subdomain>.work
 
 | Var | Purpose |
 |---|---|
-| `GITHUB_TOKEN` | A GitHub PAT (fine-grained, scoped to `magic-webs/uj-ramnagar-mobile` with `Actions: write`) — lets the panel dispatch either workflow. Leave unset to disable both "Create APK" and "Deploy web build" — they'll say so plainly instead of failing silently. |
-| `MOBILE_REPO_OWNER` / `MOBILE_REPO_NAME` / `MOBILE_REPO_REF` | Already default to `magic-webs` / `uj-ramnagar-mobile` / `main` — only change if the mobile app repo ever moves or you want to dispatch against a different branch |
+| `GITHUB_TOKEN` | A GitHub PAT that can dispatch workflow runs on `magic-webs/magic-visit-app` — a fine-grained token needs the repo explicitly selected with **Actions: Read and write** permission (Read-only isn't enough — dispatching a run is a write); a classic token needs the `workflow` scope (`repo`/`public_repo` alone isn't enough). Lets the panel dispatch either workflow. Leave unset to disable both "Create APK" and "Deploy web build" — they'll say so plainly instead of failing silently. |
+| `MOBILE_REPO_OWNER` / `MOBILE_REPO_NAME` / `MOBILE_REPO_REF` | Already default to `magic-webs` / `magic-visit-app` / `main` — only change if the mobile app repo ever moves or you want to dispatch against a different branch |
 | `NEXT_PUBLIC_EXPO_ACCOUNT` | Your expo.dev account/org slug — enables the "View builds on EAS" manual-fallback link (unrelated to the `GITHUB_TOKEN` automation, works independently) |
 
 See `magic-visit-panel/.env.example` for the exact variable block.
