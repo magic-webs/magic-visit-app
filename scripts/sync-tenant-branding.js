@@ -132,6 +132,25 @@ async function main() {
     console.log("No theme configured for this tenant yet — NOTIFICATION_COLOR left as-is.");
   }
 
+  // Bakes the FULL tenant config (theme + branding, same shape
+  // TenantConfigContext fetches at runtime) into the JS bundle as this
+  // build's starting values — the EXPO_PUBLIC_ prefix means Expo inlines it
+  // at build time, same mechanism as EXPO_PUBLIC_INSTANT_APP_ID etc. This is
+  // what fixes the "shows the default, THEN the real theme" flash on
+  // refresh: without it, the app always boots from the hardcoded fallback
+  // and only shows the real theme once the runtime fetch resolves, which is
+  // especially visible on a static web/PWA build with no native splash
+  // screen holding the seam. With it, the very first paint already has the
+  // real values; the runtime fetch still runs afterward, but only to catch
+  // any change made in the panel since this build was made — it won't
+  // visibly overwrite anything in the common case where nothing changed.
+  // Base64-encoded to keep it a safe single-line .env value (raw JSON has
+  // quotes/braces that don't survive a plain-text .env file reliably).
+  const baked = Buffer.from(JSON.stringify(data), "utf8").toString("base64");
+  next = upsertEnvVar(next, "EXPO_PUBLIC_BAKED_TENANT_CONFIG", baked);
+  changed = true;
+  console.log(`EXPO_PUBLIC_BAKED_TENANT_CONFIG=<${baked.length} bytes, base64>`);
+
   if (changed) {
     fs.writeFileSync(ENV_PATH, next);
     console.log(".env updated.");
