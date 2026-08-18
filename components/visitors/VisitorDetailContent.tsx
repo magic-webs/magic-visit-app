@@ -101,7 +101,7 @@ export function VisitorDetailContent({ logId, belowStatusCard }: { logId: string
         const remarkId = id();
         chunks.push(
           db.tx.salesRemarks[remarkId]
-            .update({ remark: remarkText.trim(), createdAt: Date.now() })
+            .update({ tenantId: session.tenantId!, remark: remarkText.trim(), createdAt: Date.now() })
             .link({ visitorLog: log.id, author: session.profileId! }),
         );
       }

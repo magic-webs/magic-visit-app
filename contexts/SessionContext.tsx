@@ -10,6 +10,7 @@ export interface SessionValue {
   userId: string | undefined;
   profile: any | undefined;
   profileId: string | undefined;
+  tenantId: string | undefined;
   role: StaffRole | undefined;
   branchId: string | undefined;
   availabilityId: string | undefined;
@@ -22,6 +23,7 @@ function emptySession(status: SessionStatus, userId?: string): SessionValue {
     userId,
     profile: undefined,
     profileId: undefined,
+    tenantId: undefined,
     role: undefined,
     branchId: undefined,
     availabilityId: undefined,
@@ -74,6 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         userId: auth.user.id,
         profile,
         profileId: profile.id,
+        tenantId: profile.tenantId,
         role: profile.role as StaffRole,
         branchId: profile.branch?.id,
         availabilityId: profile.availability?.id,

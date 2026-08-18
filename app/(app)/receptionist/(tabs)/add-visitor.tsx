@@ -117,6 +117,7 @@ export default function AddVisitorScreen() {
     const chunks: any[] = [
       db.tx.visitorLogs[logId]
         .update({
+          tenantId: session.tenantId!,
           status: followUpOn ? "follow_up" : "none",
           assignmentStatus: salespersonId ? "pending_acceptance" : "unassigned",
           serialNumber: lastSerial + 1,
@@ -130,7 +131,7 @@ export default function AddVisitorScreen() {
       const remarkId = id();
       chunks.push(
         db.tx.salesRemarks[remarkId]
-          .update({ remark: followUpRemark.trim(), createdAt: Date.now() })
+          .update({ tenantId: session.tenantId!, remark: followUpRemark.trim(), createdAt: Date.now() })
           .link({ visitorLog: logId, author: session.profileId! }),
       );
     }
@@ -189,6 +190,7 @@ export default function AddVisitorScreen() {
       await db.transact([
         db.tx.customers[customerId]
           .update({
+            tenantId: session.tenantId!,
             name: name.trim(),
             mobile: normalized,
             type: "visitor",

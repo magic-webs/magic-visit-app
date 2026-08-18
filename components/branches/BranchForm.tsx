@@ -7,9 +7,11 @@ import { AppText } from "@/components/ui/AppText";
 import { TextField } from "@/components/ui/TextField";
 import { SwitchRow } from "@/components/ui/SwitchRow";
 import { Button } from "@/components/ui/Button";
+import { useSession } from "@/contexts/SessionContext";
 
 export function BranchForm({ mode, initial }: { mode: "create" | "edit"; initial?: any }) {
   const router = useRouter();
+  const session = useSession();
   const [name, setName] = useState(initial?.name ?? "");
   const [location, setLocation] = useState(initial?.location ?? "");
   const [phone, setPhone] = useState(initial?.phone ?? "");
@@ -28,6 +30,7 @@ export function BranchForm({ mode, initial }: { mode: "create" | "edit"; initial
       if (mode === "create") {
         await db.transact(
           db.tx.branches[id()].update({
+            tenantId: session.tenantId!,
             name: name.trim(),
             location: location.trim(),
             ...(phone.trim() && { phone: phone.trim() }),
