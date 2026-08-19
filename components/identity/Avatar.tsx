@@ -9,8 +9,7 @@ const SIZE_STYLES = {
   lg: { box: "h-16 w-16", text: "text-xl" },
 } as const;
 
-// Colored circle with the person's first-letter initial — matches the source
-// app's convention of never using image avatars for people.
+// Matches the source app's convention of never using image avatars for people.
 export function Avatar({ name, size = "md" }: { name: string; size?: keyof typeof SIZE_STYLES }) {
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   const styles = SIZE_STYLES[size];

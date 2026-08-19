@@ -9,9 +9,7 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-// yyyy-mm-dd, what <input type="date"> reads and emits — built from local
-// Y/M/D rather than toISOString(), which is UTC and can roll the date back
-// a day in any timezone ahead of UTC.
+// yyyy-mm-dd for <input type="date">, built from local Y/M/D — toISOString() is UTC and can roll the date back a day.
 function toInputValue(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -46,10 +44,8 @@ export function DateField({
     }
   }
 
-  // @react-native-community/datetimepicker ships no web implementation at
-  // all, so web renders a plain HTML date input instead — created
-  // imperatively since `input` isn't a JSX intrinsic in this project's
-  // React Native type setup (no @types/react-dom).
+  // @react-native-community/datetimepicker has no web implementation, so web uses a plain HTML date input instead
+  // (created via createElement since `input` isn't a JSX intrinsic here — no @types/react-dom).
   if (Platform.OS === "web") {
     return (
       <View className="gap-1.5">

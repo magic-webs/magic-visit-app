@@ -1,10 +1,7 @@
 import type { ResolvedBrand } from "./derive-brand-vars";
 
-// Exact current production values (see constants/theme.js), hardcoded here
-// rather than round-tripped through OKLCH — this is what renders until a
-// tenant has an actual saved theme/branding row (which won't exist yet for
-// any tenant until the panel is used to set one), and it must stay pixel-
-// identical to today's app so nothing visually changes on its own.
+// Hardcoded (not derived through OKLCH) to stay pixel-identical to
+// constants/theme.js — this is what renders until a tenant has a saved theme.
 export const DEFAULT_RESOLVED_BRAND: ResolvedBrand = {
   vars: {
     "--color-brand-teal": "9 121 105",

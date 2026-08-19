@@ -13,10 +13,7 @@ export interface FollowUpScope {
   profileId?: string;
 }
 
-// Urgency-sorted (earliest followUpDate first). Taps route into the same
-// VisitorDetailContent detail screen used by the visitors list — it already
-// has the reschedule/remark UI, so a second narrower "sheet" component would
-// just duplicate it.
+// Sorted by earliest followUpDate first; taps reuse the VisitorDetailContent detail screen (already has reschedule/remark UI) instead of a duplicate sheet component.
 export function FollowUpQueueList({ scope, detailPathname }: { scope: FollowUpScope; detailPathname: string }) {
   const router = useRouter();
   const where: Record<string, any> = { followUpDate: { $isNull: false } };

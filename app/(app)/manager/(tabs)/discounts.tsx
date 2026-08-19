@@ -8,8 +8,7 @@ import { ListSkeleton } from "@/components/layout/Skeletons";
 import { ErrorState } from "@/components/layout/ErrorState";
 import { EmptyState } from "@/components/layout/EmptyState";
 
-// instant.perms.ts scopes discountRequests view to the manager's own branch —
-// no explicit branch filter needed here.
+// instant.perms.ts already scopes discountRequests to the manager's own branch — no explicit filter needed here.
 export default function ManagerDiscountsScreen() {
   const router = useRouter();
   const { data, isLoading, error } = db.useQuery({

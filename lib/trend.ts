@@ -1,7 +1,7 @@
 import type { StatTrend } from "@/components/dashboard/StatCard";
 
 // Shared "today vs yesterday" percentage-change calculation for dashboard
-// StatCards. Guards against divide-by-zero when yesterday's count was 0.
+// StatCards.
 export function computeTrend(current: number, previous: number): StatTrend {
   if (previous === 0) {
     return current > 0 ? { direction: "up", percent: 100 } : { direction: "flat", percent: 0 };

@@ -47,9 +47,8 @@ export interface DedupedVisitorEntry {
   visitCount: number;
 }
 
-// Centralizes the VisitorLogsTable-equivalent query-building logic (scope +
-// filters -> InstaQL where clause) and the dedupe-by-customer post-processing
-// shared by every role's visitor list screen.
+// Shared scope+filters -> InstaQL where-clause builder and dedupe-by-customer
+// post-processing used by every role's visitor list screen.
 export function useVisitorLogsQuery(scope: VisitorLogsScope, filters: VisitorLogsFilters) {
   const canQuery = scope.type === "all" || Boolean(scope.branchId || scope.profileId);
 

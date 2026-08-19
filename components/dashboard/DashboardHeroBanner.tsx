@@ -4,10 +4,7 @@ import { GradientView } from "@/components/ui/GradientView";
 import { AppText } from "@/components/ui/AppText";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
-// A richer greeting banner than the plain ScreenHeaderBanner (used by the
-// other roles' simpler dashboards) — wave emoji, a supporting line, a
-// today's-date pill, and a large low-opacity Gem as a decorative accent in
-// place of a jewelry photo (no image asset available for this).
+// Richer than ScreenHeaderBanner: the Gem icon stands in for a jewelry photo since no image asset is available.
 export function DashboardHeroBanner({ name }: { name: string }) {
   const { brand } = useTenantConfig();
   const dateLabel = new Date().toLocaleDateString("en-GB", {

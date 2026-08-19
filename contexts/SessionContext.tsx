@@ -36,11 +36,10 @@ const SessionContext = createContext<SessionValue>(emptySession("checking"));
 export function SessionProvider({ children }: { children: ReactNode }) {
   const auth = db.useAuth();
 
-  // The query argument (not the hook call) is what's conditional — this is
-  // the sanctioned way to defer an InstantDB query until we have a user id.
-  // Note: useQuery(null) reports isLoading: true forever, so auth.isLoading
-  // and !auth.user must both be checked before this hook's isLoading is
-  // trusted.
+  // Query argument (not the hook call) is conditional — the sanctioned way to
+  // defer an InstantDB query until there's a user id. useQuery(null) reports
+  // isLoading: true forever, so auth.isLoading/!auth.user are checked below
+  // instead of trusting this hook's isLoading directly.
   const { data, isLoading: profileLoading } = db.useQuery(
     auth.user
       ? {
@@ -66,11 +65,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (!profile || !profile.active) {
       value = emptySession("no-profile", auth.user.id);
     } else {
-      // The client SDK has our schema attached (see lib/db.ts), so it knows
-      // `branch`/`availability` are "has one" links and returns them as
-      // singular objects — unlike the auth-bridge Worker's schema-less admin
-      // queries, which always render links as arrays regardless of
-      // cardinality (see auth-bridge/src/routes/staff.routes.ts's firstId()).
+      // Client SDK has the schema attached (lib/db.ts), so it knows
+      // branch/availability are "has one" links and returns singular objects
+      // — unlike the auth-bridge's schema-less admin queries, which always
+      // render links as arrays (see staff.routes.ts's firstId()).
       value = {
         status: "ready",
         userId: auth.user.id,
@@ -85,9 +83,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Registering is idempotent (it just overwrites the profile's stored
-  // token), so re-running on every fresh sign-in is fine — this only ever
-  // needs a live session, never a specific render.
+  // Idempotent (overwrites the profile's stored token), so re-running on
+  // every fresh sign-in is fine.
   const profileId = value.profileId;
   useEffect(() => {
     if (profileId) {

@@ -6,9 +6,6 @@ import { GradientView } from "@/components/ui/GradientView";
 import { AppText } from "@/components/ui/AppText";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
-// The gradient header for create/edit form screens — a back button, a
-// title/subtitle pair, and a decorative icon badge that hints at what the
-// form is for (e.g. a person-plus glyph for "Add Staff").
 export function FormHeaderBanner({
   title,
   subtitle,

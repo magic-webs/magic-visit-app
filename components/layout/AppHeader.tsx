@@ -5,9 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppText } from "@/components/ui/AppText";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
-// The fixed top header (logo + branch badge) — the other half of the
-// StaffLayout-equivalent shell, paired with LiquidTabBar. Mounted once per
-// role inside each (tabs)/_layout.tsx.
+// Paired with LiquidTabBar as the tab-shell chrome; mounted once per role in each (tabs)/_layout.tsx.
 export function AppHeader({
   subtitle,
   branchName,

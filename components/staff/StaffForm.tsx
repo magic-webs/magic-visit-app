@@ -20,9 +20,7 @@ const CREATABLE_ROLES: { value: StaffRole; label: string }[] = [
   { value: "accountant", label: "Accountant" },
 ];
 
-// Every staff create/update goes through the Worker (lib/auth-bridge.ts),
-// never a direct db.transact — see instant.perms.ts for why `profiles`
-// never accepts client writes.
+// Staff create/update always goes through the Worker (lib/auth-bridge.ts) — `profiles` rejects direct client writes (instant.perms.ts).
 export function StaffForm({
   mode,
   initial,

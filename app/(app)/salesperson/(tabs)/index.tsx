@@ -12,9 +12,7 @@ import { EmptyState } from "@/components/layout/EmptyState";
 import { useSession } from "@/contexts/SessionContext";
 import { theme } from "@/constants/theme";
 
-// The Accept/Decline queue — Accept/Decline are deliberately inline on the
-// card (high-frequency, low-stakes, time-sensitive), unlike the accountant's
-// discount-decision flow which requires a tap-through first.
+// Accept/Decline are inline on the card (high-frequency, low-stakes), unlike the accountant's tap-through discount flow.
 export default function SalespersonQueueScreen() {
   const session = useSession();
   const { data, isLoading, error } = db.useQuery(

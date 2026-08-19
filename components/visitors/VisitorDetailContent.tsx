@@ -31,9 +31,7 @@ import { useSession } from "@/contexts/SessionContext";
 import { theme, type VisitorStatus } from "@/constants/theme";
 import { cn } from "@/lib/cn";
 
-// "Follow Up" is deliberately not a selectable option here — scheduling a
-// next follow-up below is what sets that status, so listing it here too
-// would just be a second, redundant way to do the same thing.
+// "Follow Up" isn't selectable here — scheduling a follow-up below already sets that status.
 const STATUS_OPTIONS: { value: VisitorStatus; label: string }[] = [
   { value: "none", label: "—" },
   { value: "sold", label: "Sold" },
@@ -42,9 +40,7 @@ const STATUS_OPTIONS: { value: VisitorStatus; label: string }[] = [
   { value: "window_shopping", label: "Window Shopping" },
 ];
 
-// Shared by receptionist/manager/owner's visitor detail screens — the
-// VisitorLogsTable detail-dialog equivalent, as its own route/component
-// instance rather than page-level dialog state (see VisitorLogsList).
+// Shared by receptionist/manager/owner's visitor detail screens — a dedicated route/component rather than page-level dialog state.
 export function VisitorDetailContent({ logId, belowStatusCard }: { logId: string; belowStatusCard?: ReactNode }) {
   const session = useSession();
   const router = useRouter();

@@ -6,8 +6,7 @@ import { ListSkeleton } from "@/components/layout/Skeletons";
 import { ErrorState } from "@/components/layout/ErrorState";
 import { EmptyState } from "@/components/layout/EmptyState";
 
-// Branch-wide history (not just this accountant's own) — any accountant in
-// the branch can see what's pending/applied/cancelled/locked for reconciliation.
+// Branch-wide history, not just this accountant's own — any accountant in the branch needs it for reconciliation.
 export default function AccountantHistoryScreen() {
   const router = useRouter();
   const { data, isLoading, error } = db.useQuery({

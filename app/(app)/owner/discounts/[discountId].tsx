@@ -14,8 +14,7 @@ function formatDiscount(type: string, value: number) {
   return type === "percentage" ? `${value}%` : `₹${value.toLocaleString("en-IN")}`;
 }
 
-// Read-only for the owner — oversight only, no OTP reveal here. Only the
-// branch manager can reveal/relay the code (see manager/discounts/[discountId]).
+// Read-only for the owner — only the branch manager can reveal/relay the OTP (see manager/discounts/[discountId]).
 export default function OwnerDiscountDetailScreen() {
   const { discountId } = useLocalSearchParams<{ discountId: string }>();
   const router = useRouter();

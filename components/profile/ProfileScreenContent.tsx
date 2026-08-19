@@ -70,9 +70,7 @@ function InfoRow({
   );
 }
 
-// Shared across every role's profile.tsx — role-specific screens pass
-// `extraRows` for anything beyond the common identity/contact info (e.g.
-// the salesperson's full AvailabilityToggle).
+// Shared across every role's profile.tsx; `extraRows` adds role-specific content (e.g. AvailabilityToggle).
 export function ProfileScreenContent({ extraRows }: { extraRows?: ReactNode }) {
   const session = useSession();
   const profile = session.profile;

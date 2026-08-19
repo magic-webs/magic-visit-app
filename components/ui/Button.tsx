@@ -16,21 +16,8 @@ interface ButtonProps extends Omit<PressableProps, "children"> {
   icon?: ComponentType<{ size?: number; color?: string }>;
 }
 
-// The "lip" is a solid-color layer sat behind the button face at rest, and
-// covered up on press — that's the whole Duolingo 3D trick, no shadows
-// involved. `edge` is that lip's color; `depth` is how tall it is.
-//
-// A function, not a top-level object — `primary`/`secondary`/`ghost`'s
-// spinner tint and `primary`/`secondary`'s edge reference `theme.teal.*`/
-// `theme.gold.border`, which applyResolvedBrandColors() (see
-// constants/theme.ts) mutates once a tenant's brand resolves. A frozen
-// object built at import time would permanently keep the hardcoded default
-// teal edge/spinner no matter what color a tenant picks — this is called
-// fresh on every render instead. `outline`'s edge and the
-// `destructive`/`destructiveOutline` variants stay fixed (a pale wash /
-// status reds respectively) — there's no existing derived "pale tint" of
-// the tenant's primary to substitute without risking a muddy result for an
-// arbitrary hue.
+// The "lip" (`edge`/`depth`) is a solid-color layer behind the button face, covered on press — a 3D effect with no shadows.
+// A function, not a frozen object, so edge/spinner colors stay live when applyResolvedBrandColors() mutates theme.teal/theme.gold for a tenant.
 function getVariantStyles(): Record<ButtonVariant, { container: string; text: string; spinner: string; edge: string }> {
   return {
     primary: { container: "bg-brand-teal", text: "text-white", spinner: "#fff", edge: theme.teal.edge },

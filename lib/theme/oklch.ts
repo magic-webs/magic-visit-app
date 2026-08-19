@@ -1,9 +1,6 @@
-// Pure OKLCH -> sRGB conversion, ported from magic-visit-panel/lib/theme/oklch.ts
-// (that module was written to be portable specifically so this port could
-// happen without re-deriving the math). No DOM/React/RN imports on purpose.
-//
-// Math follows Björn Ottosson's OKLab reference:
-// https://bottosson.github.io/posts/oklab/
+// Pure OKLCH -> sRGB conversion, ported from magic-visit-panel/lib/theme/oklch.ts.
+// No DOM/React/RN imports on purpose. Math follows Björn Ottosson's OKLab
+// reference: https://bottosson.github.io/posts/oklab/
 
 export interface Oklch {
   l: number; // 0..1

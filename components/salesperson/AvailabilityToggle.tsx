@@ -4,9 +4,7 @@ import { AppText } from "@/components/ui/AppText";
 import { AVAILABILITY_STYLES, type AvailabilityStatus } from "@/constants/theme";
 import { useSession } from "@/contexts/SessionContext";
 
-// A persisted field + regular useQuery, not ephemeral presence/rooms — this
-// is business status ("am I free to take a new visitor"), not connectivity,
-// and must survive backgrounding. See salespersonAvailability in the schema.
+// Persisted business status ("free to take a visitor"), not connectivity, so it's a regular field/query, not ephemeral presence.
 export function AvailabilityToggle({ compact }: { compact?: boolean }) {
   const session = useSession();
   const current = (session.availabilityStatus ?? "offline") as AvailabilityStatus;

@@ -8,11 +8,9 @@ import { registerPushToken, unregisterPushToken } from "@/lib/auth-bridge";
 
 const DEVICE_ID_KEY = "urmil_device_id";
 
-// A stable id for this install, independent of which staff member is signed
-// in — generated once and persisted, so re-registering (app foreground,
-// sign out/in as someone else on the same phone) upserts the same `devices`
-// row instead of creating a new one every time. Not the same thing as an
-// Expo push token, which can itself change (reinstall, OS-level reset).
+// Stable per-install id, independent of which staff member is signed in —
+// generated once and persisted so re-registering upserts the same `devices`
+// row. Distinct from the Expo push token, which can itself change.
 async function getDeviceId(): Promise<string> {
   const existing = await AsyncStorage.getItem(DEVICE_ID_KEY);
   if (existing) return existing;
@@ -21,10 +19,8 @@ async function getDeviceId(): Promise<string> {
   return generated;
 }
 
-// Foreground behavior — without this, notifications received while the app
-// is open never surface a banner/sound (Expo's default handler is silent).
-// expo-notifications has no web implementation for this, so it's guarded
-// the same way registerForPushNotifications is below.
+// Without this, notifications received while the app is foregrounded never
+// surface a banner/sound (Expo's default handler is silent). No web impl.
 if (Platform.OS !== "web") {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -47,23 +43,17 @@ async function ensureAndroidChannel() {
   });
 }
 
-// Requests permission, fetches this device's Expo push token, and registers
-// this device (and its token) against the signed-in staff member's profile.
-// Safe to call every time the app foregrounds with an active session —
-// registration is idempotent (upserts the same `devices` row by deviceId).
-// Push notifications are mobile-only (Android/iOS) and require a native EAS
-// build — never a fatal path, so every failure here is swallowed rather than
-// surfaced.
+// Requests permission and registers this device's Expo push token against
+// the signed-in staff member's profile. Safe to call on every foreground —
+// idempotent via deviceId. Never fatal; failures are swallowed, not surfaced.
 export async function registerForPushNotifications(): Promise<void> {
-  // No push support in the web dev preview this project is also served
-  // from — Expo's web push path needs its own (unconfigured) VAPID setup.
+  // Expo's web push path needs its own (unconfigured) VAPID setup.
   if (Platform.OS === "web") return;
 
   try {
     await ensureAndroidChannel();
 
-    // Push tokens don't exist on iOS simulators — nothing to register.
-    // Android emulators with Google Play services do support push tokens.
+    // Push tokens don't exist on iOS simulators (Android emulators do).
     if (Platform.OS === "ios" && !Device.isDevice) return;
 
     const { status: existingStatus } = await Notifications.getPermissionsAsync();

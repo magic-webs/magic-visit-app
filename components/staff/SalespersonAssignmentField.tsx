@@ -5,9 +5,7 @@ import { AppText } from "@/components/ui/AppText";
 import { cn } from "@/lib/cn";
 import { theme } from "@/constants/theme";
 
-// Lets a manager/owner assign which salespersons a receptionist may pick
-// from in the Add Visitor flow — without this, SalespersonPicker's
-// receptionist-scoped query has nothing to show.
+// Lets a manager/owner assign the salespersons a receptionist can pick from in SalespersonPicker's Add Visitor flow.
 export function SalespersonAssignmentField({
   branchId,
   value,

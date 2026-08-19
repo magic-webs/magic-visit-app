@@ -74,11 +74,8 @@ export interface UpdateStaffInput extends Partial<Omit<CreateStaffInput, "role">
   active?: boolean;
 }
 
-// Staff creation/editing always goes through the Worker (never a direct
-// db.transact) — instant.perms.ts locks `profiles` writes to admin-SDK-only,
-// since InstantDB's field-level permissions don't cleanly support scoping
-// writes the way they scope reads (see instant.perms.ts for the full
-// rationale).
+// Staff creation/editing always goes through the Worker, never a direct
+// db.transact — instant.perms.ts locks `profiles` writes to admin-SDK-only.
 export function createStaff(input: CreateStaffInput) {
   return authedFetch<{ id: string; name: string; mobile: string; role: string; branchId: string | null }>(
     "/staff",
@@ -106,10 +103,8 @@ export interface RegisterPushTokenInput {
   osVersion?: string;
 }
 
-// Registers this device against the signed-in staff member's profile — see
-// lib/push-notifications.ts for when this is called. Upserts by deviceId, so
-// re-registering (app foreground, re-login) updates the same device rather
-// than creating a duplicate.
+// Upserts by deviceId, so re-registering (app foreground, re-login) updates
+// the same device rather than creating a duplicate.
 export function registerPushToken(input: RegisterPushTokenInput) {
   return authedFetch<{ id: string }>("/me/push-token", "PUT", input);
 }
@@ -126,9 +121,8 @@ export interface SendNotificationInput {
   data?: Record<string, unknown>;
 }
 
-// Fires a push notification for an in-app event (e.g. a visitor assigned to
-// a salesperson). Recipients are resolved server-side from either an
-// explicit id list or a role broadcast — see notifications.routes.ts.
+// Fires a push notification for an in-app event. Recipients are resolved
+// server-side from either an explicit id list or a role broadcast.
 export function sendNotification(input: SendNotificationInput) {
   return authedFetch<{ sent: number }>("/notifications/send", "POST", input);
 }
@@ -139,11 +133,10 @@ export interface CreateDiscountInput {
   discountValue: number;
 }
 
-// Accountant-initiated discount authorization flow — see discounts.routes.ts.
-// The OTP is generated server-side and never returned here; the branch
-// manager reveals it in-app (revealDiscountOtp) and relays it verbally.
-// `status` is "applied" immediately for a prime-member customer (no OTP
-// step at all) or "pending_otp" otherwise.
+// Accountant-initiated discount authorization flow. The OTP is generated
+// server-side and never returned here; the branch manager reveals it in-app
+// (revealDiscountOtp). `status` is "applied" immediately for a prime-member
+// customer (no OTP step) or "pending_otp" otherwise.
 export function createDiscount(input: CreateDiscountInput) {
   return authedFetch<{ id: string; status: "applied" | "pending_otp" }>("/discounts", "POST", input);
 }

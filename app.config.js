@@ -1,33 +1,23 @@
-// Replaces the old static app.json. app.json is only ever read at BUILD
-// time (expo prebuild / eas build) — it's a completely separate mechanism
-// from the runtime tenant theme/branding fetch in
-// contexts/TenantConfigContext.tsx, which only affects what's drawn on
-// screen after the app is already installed. Making a per-tenant white-
-// label BUILD (different app name, bundle id, icon, notification color)
-// means these build-time-only fields have to come from somewhere too —
-// this file reads them from env vars, defaulting to the exact values that
-// were hardcoded here before, so a build with no overrides set is
-// unaffected.
+// Replaces the old static app.json. app.json is only read at build time
+// (expo prebuild / eas build) — separate from the runtime tenant
+// theme/branding fetch in contexts/TenantConfigContext.tsx. A per-tenant
+// white-label build needs these build-time-only fields (app name, bundle id,
+// icon, notification color) from env vars, defaulting to the values
+// hardcoded here before, so a build with no overrides is unaffected.
 //
 // To build a differently-branded release: set APP_NAME/APP_SLUG/APP_SCHEME/
-// IOS_BUNDLE_ID/ANDROID_PACKAGE/NOTIFICATION_COLOR (e.g. as an EAS build
-// profile's "env" in eas.json, or in your shell) before running
-// `eas build`/`expo prebuild`. Icon/splash/adaptive-icon images still have
-// to be real local files (Expo's build pipeline needs to process them) —
-// point ICON_PATH/ADAPTIVE_ICON_PATH/SPLASH_ICON_PATH/FAVICON_PATH at a
-// different tenant's asset files if you have them checked in locally.
+// IOS_BUNDLE_ID/ANDROID_PACKAGE/NOTIFICATION_COLOR before running
+// `eas build`/`expo prebuild`. Icon/splash/adaptive-icon images still need to
+// be real local files (Expo's build pipeline processes them) — point
+// ICON_PATH/ADAPTIVE_ICON_PATH/SPLASH_ICON_PATH/FAVICON_PATH at a different
+// tenant's asset files if checked in locally.
 //
-// See scripts/sync-tenant-branding.js for an optional helper that pulls a
-// tenant's current name/brand color from the panel-managed config (via the
-// auth-bridge's public lookup endpoint) and writes them into .env.tenant —
-// run it before building if you'd rather not hand-copy values from the
-// panel every time.
+// See scripts/sync-tenant-branding.js for a helper that pulls these values
+// from the panel-managed config instead of hand-copying them.
 
 const DEFAULTS = {
-  // Generic default now that this is a shared, multi-tenant codebase rather
-  // than a single Urmil Jewellers-specific build — set APP_NAME (e.g. per
-  // EAS build profile, or via npm run sync-tenant-branding) to actually
-  // brand a real tenant's build.
+  // Generic default for this shared, multi-tenant codebase — set APP_NAME to
+  // actually brand a real tenant's build.
   name: "magic-visit-app",
   slug: "urmil-jewellers-ramnagar",
   scheme: "urmiljewellersramnagar",

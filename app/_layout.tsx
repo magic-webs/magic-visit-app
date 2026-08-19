@@ -6,8 +6,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
-// As of SDK 56, expo-router vendors its own ThemeProvider — importing from
-// @react-navigation/native directly trips a hard compatibility guard.
+// SDK 56: expo-router vendors its own ThemeProvider; importing from @react-navigation/native directly trips a compatibility guard.
 import { Stack, ThemeProvider } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -41,20 +40,11 @@ export default function RootLayout() {
   );
 }
 
-// Split out so it can call useTenantConfig() — needs to be inside
-// TenantConfigProvider, which itself has to wrap everything (including the
-// login screen, which needs the tenant's logo/name before anyone signs in).
+// Split out so it can call useTenantConfig(), which must wrap everything including the (pre-login) login screen.
 function ThemedRoot() {
   const { brand } = useTenantConfig();
 
-  // Web only — `theme.font` (see lib/theme/presets.ts's FONT_OPTIONS in the
-  // panel) is a CSS font stack, not a real React Native font family name,
-  // so it can only be honored on the web build; native font selection
-  // would need actual bundled font files per choice, which isn't built
-  // yet. `!important` + a broad selector is deliberate: NativeWind compiles
-  // `font-sans`/`font-sans-medium`/etc. into their own font-family
-  // declarations with normal specificity, and this has to reliably beat
-  // all of them, not just set an inherited default that they'd override.
+  // Web-only: theme.font is a CSS stack, not a native font family; !important is needed to beat NativeWind's own font-sans-* rules.
   useEffect(() => {
     if (Platform.OS !== "web" || typeof document === "undefined") return;
     const styleEl = document.createElement("style");
@@ -65,11 +55,7 @@ function ThemedRoot() {
   }, [brand.fontFamily]);
 
   return (
-    // `vars(...)` turns the resolved brand colors into CSS custom properties
-    // that every `bg-brand-teal`/`text-brand-teal`/etc. Tailwind class below
-    // this View resolves against (see tailwind.config.js) — this is what
-    // makes the whole app's brand color re-skin per tenant without having
-    // to touch every screen that uses those classes.
+    // vars(brand.vars) exposes brand colors as CSS custom properties so bg-brand-teal/etc. classes re-skin per tenant with no per-screen changes.
     <View style={[{ flex: 1 }, vars(brand.vars)]}>
       <ThemeProvider value={buildNavigationTheme(brand.navigation)}>
         <SessionProvider>

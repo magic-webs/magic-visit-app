@@ -4,8 +4,7 @@ import { GradientView } from "@/components/ui/GradientView";
 import { AppText } from "@/components/ui/AppText";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
-// The gradient hero banner with decorative blurred circles, repeated across
-// every dashboard/list screen in the source app.
+// Reused across every dashboard/list screen in the source app.
 export function ScreenHeaderBanner({
   title,
   subtitle,

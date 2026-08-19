@@ -1,8 +1,5 @@
-// Dependency-free base64 -> UTF-8 decode (no reliance on Buffer, which isn't
-// a JS-engine global in Hermes/React Native — and, since app/+html.tsx also
-// uses this at web export time, not guaranteed to have @types/node typed in
-// this project either — or atob/escape, which are inconsistently
-// available/deprecated).
+// Dependency-free base64 -> UTF-8 decode — avoids Buffer (not a global in
+// Hermes/React Native) and atob/escape (inconsistently available/deprecated).
 export function base64ToUtf8(base64: string): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   const bytes: number[] = [];

@@ -27,9 +27,8 @@ export interface TenantConfigResponse {
   } | null;
 }
 
-// Public, unauthenticated endpoint (auth-bridge/src/routes/login.routes.ts)
-// — safe to call before anyone has signed in, which is exactly when the
-// login screen needs it to show the right logo/colors.
+// Public, unauthenticated endpoint — safe to call before sign-in, which is
+// when the login screen needs it to show the right logo/colors.
 export async function fetchTenantConfig(): Promise<TenantConfigResponse> {
   const res = await fetch(`${BASE_URL}/organizations/lookup?slug=${encodeURIComponent(TENANT_SLUG)}`);
   if (!res.ok) {

@@ -80,8 +80,7 @@ export default function AddVisitorScreen() {
       const { data } = await (db.queryOnce as any)({
         customers: {
           $: { where: { mobile: normalized } },
-          // `limit`/`offset` etc. only work on top-level namespaces, not
-          // nested relations — order here, then take the first 5 client-side.
+          // limit/offset don't work on nested relations, so order here and slice to 5 client-side.
           visitorLogs: { $: { order: { visitedAt: "desc" } } },
         },
       });

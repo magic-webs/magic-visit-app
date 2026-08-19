@@ -10,23 +10,16 @@ interface NotificationData {
   requestId?: string;
 }
 
-// Routes a tapped push notification to the right in-app screen — mounted
-// once near the root (see app/_layout.tsx) so it works no matter which
-// screen happens to be on top when the tap arrives. Renders nothing.
+// Mounted once near the root (see app/_layout.tsx) so it works regardless of which screen is on top when the tap arrives.
 export function NotificationRouter() {
   const router = useRouter();
   const session = useSession();
 
-  // Read via a ref rather than closing over `session` directly — the
-  // listener below is registered once (empty deps) so its closure would
-  // otherwise always see the role from the very first render.
+  // Ref instead of closing over `session`: the listener below has empty deps, so a closure would only ever see the first render's role.
   const sessionRef = useRef(session);
   sessionRef.current = session;
 
-  // A tap that arrives before the session has resolved (cold start) gets
-  // held here and flushed once it's ready — discount notifications route
-  // differently depending on whether the signed-in user is the branch
-  // manager or the owner, so it can't route without knowing the role yet.
+  // Holds a tap that arrives before the session resolves (cold start); discount routes depend on role, so it can't route until the role is known.
   const pending = useRef<NotificationData | null>(null);
 
   function route(data: NotificationData) {
@@ -56,8 +49,7 @@ export function NotificationRouter() {
   }
 
   useEffect(() => {
-    // expo-notifications has no web implementation — same guard used for
-    // registration in lib/push-notifications.ts.
+    // expo-notifications has no web implementation (same guard as lib/push-notifications.ts).
     if (Platform.OS === "web") return;
 
     // Cold start: the app was launched by tapping a notification.

@@ -3,9 +3,7 @@ import { View } from "react-native";
 import { AppText } from "./AppText";
 import { theme } from "@/constants/theme";
 
-/** Icon badge + bold title (+ optional subtitle) — the header row used above
- * a card's content, e.g. "Visit details" or "Remarks" on the visitor detail
- * screen. */
+/** Icon badge + bold title (+ optional subtitle) header row shown above a card's content. */
 export function SectionHeader({
   icon: Icon,
   title,

@@ -2,8 +2,7 @@ import { View } from "react-native";
 import { VisitorLogsList } from "@/components/visitors/VisitorLogsList";
 import { useSession } from "@/contexts/SessionContext";
 
-// The salesperson's full handled-visitors history (all statuses, not just
-// still-open ones — see active.tsx for the unresolved-only view).
+// Full history across all statuses; see active.tsx for the unresolved-only view.
 export default function SalespersonVisitorsScreen() {
   const session = useSession();
   return (

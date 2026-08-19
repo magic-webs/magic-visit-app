@@ -2,9 +2,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { View, Pressable, type LayoutChangeEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, Easing } from "react-native-reanimated";
-// Expo Router's <Tabs> passes its OWN BottomTabBarProps shape to `tabBar`
-// (not @react-navigation/bottom-tabs's, which is a subtly incompatible type
-// — e.g. ColorValue vs string on header options).
+// Expo Router's <Tabs> passes its own BottomTabBarProps to `tabBar`, not @react-navigation/bottom-tabs's (subtly incompatible, e.g. ColorValue vs string).
 import type { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs/types";
 import { AppText } from "@/components/ui/AppText";
 import { theme } from "@/constants/theme";
@@ -17,11 +15,7 @@ export interface TabBarItem {
 
 const BAR_PADDING = 8; // matches the container's px-2/py-2
 
-// The native analogue of the source app's floating "liquid pill" bottom tab
-// bar, with the sliding active-tab highlight the web version had via Framer
-// Motion's layoutId — here as a plain timed slide (no spring bounce) pill
-// measured against the bar's own width, sitting behind the tab items
-// (style-only Animated.View, no className — see Button.tsx for why).
+// Sliding pill highlight is a plain timed slide (no spring), sized against the bar's own width; style-only Animated.View carries the transform (see Button.tsx).
 export function LiquidTabBar({ state, navigation, items }: BottomTabBarProps & { items: TabBarItem[] }) {
   const insets = useSafeAreaInsets();
   const activeRouteName = state.routes[state.index]?.name;

@@ -1,6 +1,5 @@
-// Raw color values — the single source of truth for both Tailwind (via
-// tailwind.config.js, which require()s this file) and app code (via
-// constants/theme.ts, which re-exports and types these).
+// Single source of truth for both Tailwind (tailwind.config.js requires this)
+// and app code (constants/theme.ts re-exports and types these).
 module.exports = {
   teal: {
     DEFAULT: "#097969",

@@ -5,9 +5,8 @@ import { ROLE_HOME } from "@/constants/navigation";
 
 export type RequireRoleResult = { state: "checking" } | { state: "authorized" } | { state: "redirect"; redirectTo: Href };
 
-// Mirrors the web app's `allowedRoles` prop on StaffLayout — the difference
-// is this returns data instead of rendering, since Expo Router's per-role
-// layout file already plays the "wrapper" role.
+// Mirrors the web app's `allowedRoles` prop on StaffLayout, but returns data
+// instead of rendering — Expo Router's per-role layout file is the wrapper.
 export function useRequireRole(allowed: StaffRole | StaffRole[]): RequireRoleResult {
   const session = useSession();
   const allowedList = Array.isArray(allowed) ? allowed : [allowed];

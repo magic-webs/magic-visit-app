@@ -12,18 +12,10 @@ import { TextField } from "@/components/ui/TextField";
 import { SelectField } from "@/components/ui/SelectField";
 import { SwitchRow } from "@/components/ui/SwitchRow";
 
-// Matches the "Prime" badge color used on the accountant's lookup screen
-// (app/(app)/accountant/(tabs)/index.tsx) — kept in sync manually since
-// there's no shared theme token for it.
+// Matches the accountant lookup screen's "Prime" badge color; no shared theme token, so keep in sync manually.
 const PRIME_COLOR = "#b45309";
 
-// Shared by the branch-manager and owner "Manage Prime Members" screens —
-// find a customer by mobile number (same chain-wide lookup pattern as the
-// receptionist's add-visitor search) and set their prime status + preset
-// discount. Saved directly via db.transact — instant.perms.ts already
-// scopes `customers` updates to isOwner || isOwnBranchManager, so a branch
-// manager saving a customer outside their own branch is rejected there,
-// surfaced below as a plain error rather than a crash.
+// instant.perms.ts scopes customer updates to isOwner || isOwnBranchManager, so saving outside a manager's own branch is rejected server-side and surfaced below as a plain error.
 export function PrimeMemberManager() {
   const router = useRouter();
   const insets = useSafeAreaInsets();

@@ -6,8 +6,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-na
 import { AppText } from "@/components/ui/AppText";
 import { theme } from "@/constants/theme";
 
-// Same press-scale pattern as Button.tsx — plain View/Pressable carry
-// className, a style-only Animated.View carries the transform.
+// Same press-scale pattern as Button.tsx: className on plain views, transform on a style-only Animated.View.
 export function QuickActionCard({
   icon: Icon,
   label,

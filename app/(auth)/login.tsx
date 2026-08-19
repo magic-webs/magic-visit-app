@@ -40,8 +40,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await loginWithMobile(mobile, password);
-      // SessionProvider picks up the new auth state; app/index.tsx redirects
-      // to the right role home automatically.
+      // SessionProvider picks up the new auth state; app/index.tsx handles the redirect.
     } catch (err) {
       setError(err instanceof AuthBridgeError ? err.message : "Something went wrong. Please try again.");
     } finally {

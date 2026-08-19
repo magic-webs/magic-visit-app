@@ -14,9 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { STATUS_STYLES, type VisitorStatus } from "@/constants/theme";
 
-// The VisitorLogsTable equivalent — the List/Table density toggle from the
-// web app is dropped in favor of a single, comfortable list row (a literal
-// HTML-style table doesn't translate to a phone-width screen).
+// Web's List/Table density toggle is dropped in favor of a single list row — a literal table doesn't fit a phone-width screen.
 export function VisitorLogsList({
   scope,
   detailPathname,
@@ -47,10 +45,8 @@ export function VisitorLogsList({
     setHAndMFilter(undefined);
   }
 
-  // The filter chips must stay mounted regardless of loading/error state —
-  // InstantDB's isLoading flips back to true on every filter change (new
-  // query shape = new subscription), so gating the whole screen on it would
-  // tear out the chips themselves each time you tap one.
+  // Filter chips must stay mounted regardless of isLoading — it flips true on every filter change (new query = new
+  // subscription), so gating the whole screen on it would tear out the chips themselves each time you tap one.
   return (
     <View className="flex-1">
       <View className="flex-row items-center justify-between px-4 py-3 gap-2">
@@ -142,7 +138,6 @@ export function VisitorLogsList({
         title="Filter Visitors"
       >
         <View className="gap-6 p-5">
-          {/* Status Section */}
           <View className="gap-2">
             <AppText className="font-sans-semibold text-xs text-[#4b5563] uppercase tracking-wider">Visitor Status</AppText>
             <View className="flex-row flex-wrap gap-2">
@@ -168,7 +163,6 @@ export function VisitorLogsList({
             </View>
           </View>
 
-          {/* Gender Section */}
           <View className="gap-2">
             <AppText className="font-sans-semibold text-xs text-[#4b5563] uppercase tracking-wider">Gender</AppText>
             <View className="flex-row gap-2">
@@ -196,7 +190,6 @@ export function VisitorLogsList({
             </View>
           </View>
 
-          {/* H&M Section */}
           <View className="gap-2">
             <AppText className="font-sans-semibold text-xs text-[#4b5563] uppercase tracking-wider">H&M</AppText>
             <View className="flex-row gap-2">
@@ -224,7 +217,6 @@ export function VisitorLogsList({
             </View>
           </View>
 
-          {/* Action Buttons */}
           <View className="flex-row gap-3 pt-4 border-t border-brand-gold-100">
             <Button
               variant="outline"

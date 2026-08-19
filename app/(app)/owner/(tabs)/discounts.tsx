@@ -8,8 +8,7 @@ import { ListSkeleton } from "@/components/layout/Skeletons";
 import { ErrorState } from "@/components/layout/ErrorState";
 import { EmptyState } from "@/components/layout/EmptyState";
 
-// Owner sees every branch's discount activity, read-only — only the branch
-// manager can reveal/relay the OTP (see manager/discounts/[discountId]).
+// Read-only for the owner — only the branch manager can reveal/relay the OTP (see manager/discounts/[discountId]).
 export default function OwnerDiscountsScreen() {
   const router = useRouter();
   const { data, isLoading, error } = db.useQuery({

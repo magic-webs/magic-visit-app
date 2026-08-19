@@ -26,10 +26,8 @@ export interface TenantConfigValue {
 
 function resolve(data: TenantConfigResponse): Pick<TenantConfigValue, "brand" | "branding"> {
   const brand = data.theme ? deriveResolvedBrand(data.theme.light, data.theme.font) : DEFAULT_RESOLVED_BRAND;
-  // See constants/theme.ts's applyResolvedBrandColors doc comment — this
-  // keeps the ~25 call sites that read theme.teal/theme.gradients.primary
-  // directly (not via a Tailwind class) in sync with whatever this tenant's
-  // theme resolves to.
+  // Keeps the ~25 direct (non-Tailwind-class) theme.teal/theme.gradients.primary
+  // readers in sync — see constants/theme.ts's applyResolvedBrandColors.
   applyResolvedBrandColors({
     primary: brand.navigation.primary,
     hover: brand.gradientPrimary[1],
@@ -53,16 +51,11 @@ function resolve(data: TenantConfigResponse): Pick<TenantConfigValue, "brand" | 
   };
 }
 
-// EXPO_PUBLIC_BAKED_TENANT_CONFIG is written at BUILD time by
-// scripts/sync-tenant-branding.js (base64 of this tenant's theme+branding,
-// fetched from the auth-bridge right before `expo export`/`eas build`
-// runs) and, because of the EXPO_PUBLIC_ prefix, gets inlined into the JS
-// bundle as a literal string — no env var lookup happens on the device.
-// This exists specifically to avoid a "shows the hardcoded default, THEN
-// the real theme" flash on startup/refresh: without it, the app always
-// boots from DEFAULT_RESOLVED_BRAND and only shows the tenant's real theme
-// once the runtime fetch below resolves, which is especially visible on a
-// static web/PWA build with no native splash screen to hide the seam.
+// EXPO_PUBLIC_BAKED_TENANT_CONFIG is written at build time by
+// scripts/sync-tenant-branding.js (base64 tenant theme+branding, inlined into
+// the JS bundle via the EXPO_PUBLIC_ prefix) so the app boots with the real
+// theme instead of flashing DEFAULT_RESOLVED_BRAND before the runtime fetch
+// resolves — most visible on static web/PWA with no splash screen to hide it.
 function decodeBakedConfig(): TenantConfigResponse | null {
   const encoded = process.env.EXPO_PUBLIC_BAKED_TENANT_CONFIG;
   if (!encoded) return null;
@@ -74,25 +67,19 @@ function decodeBakedConfig(): TenantConfigResponse | null {
 }
 
 const bakedConfig = decodeBakedConfig();
-// Computed once at module load (not per-render) — also fires
-// applyResolvedBrandColors() immediately, before any component even
-// mounts, so the ~25 direct theme.teal/theme.gradients.primary consumers
-// start correct too, not just the CSS-variable-driven Tailwind classes.
+// Computed once at module load, which also fires applyResolvedBrandColors()
+// before any component mounts, so direct theme.* consumers start correct too.
 const defaultValue: TenantConfigValue = bakedConfig
   ? { ...resolve(bakedConfig), isLoading: true }
   : { brand: DEFAULT_RESOLVED_BRAND, branding: DEFAULT_BRANDING, isLoading: true };
 
 const TenantConfigContext = createContext<TenantConfigValue>(defaultValue);
 
-// Fetches this build's tenant (theme + branding) once at startup — a
-// tenant's brand rarely changes, so a single REST call (not a live InstantDB
-// query) is enough, and it works before anyone has signed in, which the
-// login screen needs. Starts from the build-time-baked config when one was
-// produced (see decodeBakedConfig above — this is what's actually correct
-// on first paint), then AsyncStorage cache (a more recent runtime fetch may
-// have happened since this build), then the hardcoded fallback if neither
-// exists — the live fetch below still runs regardless, to catch any change
-// made in the panel since whichever of those was current.
+// Fetches this build's tenant (theme + branding) once at startup via a plain
+// REST call (a tenant's brand rarely changes, and this works pre-login).
+// Paints from the build-time-baked config, then AsyncStorage cache, then the
+// hardcoded fallback, in that priority — the live fetch below always still
+// runs, to catch any change made in the panel since.
 export function TenantConfigProvider({ children }: { children: ReactNode }) {
   const [value, setValue] = useState<TenantConfigValue>(defaultValue);
 
@@ -115,9 +102,7 @@ export function TenantConfigProvider({ children }: { children: ReactNode }) {
         setValue({ ...resolve(fresh), isLoading: false });
         AsyncStorage.setItem(CACHE_KEY, JSON.stringify(fresh)).catch(() => {});
       } catch {
-        // Offline / bridge unreachable — keep whatever's already painted
-        // (baked-in config, cache, or the hardcoded default) instead of
-        // blocking on an error.
+        // Offline / bridge unreachable — keep whatever's already painted.
         if (!cancelled) setValue((prev) => ({ ...prev, isLoading: false }));
       }
     })();

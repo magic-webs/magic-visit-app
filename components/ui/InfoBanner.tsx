@@ -3,8 +3,6 @@ import { View } from "react-native";
 import { AppText } from "./AppText";
 import { theme } from "@/constants/theme";
 
-// A mint/light-teal info card used above forms to explain what happens next
-// (e.g. "the new staff member gets instant access based on their role").
 export function InfoBanner({
   icon: Icon,
   title,

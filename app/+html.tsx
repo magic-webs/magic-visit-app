@@ -3,19 +3,8 @@ import type { PropsWithChildren } from "react";
 import { parseOklch, oklchToHex } from "@/lib/theme/oklch";
 import { base64ToUtf8 } from "@/lib/base64";
 
-// +html.tsx is only ever evaluated once, server-side, during `expo export -p
-// web`'s static HTML generation (see
-// https://docs.expo.dev/router/reference/static-rendering/#root-html) — it
-// never re-renders client-side, so reading EXPO_PUBLIC_BAKED_TENANT_CONFIG
-// (baked in by scripts/sync-tenant-branding.js, same value
-// contexts/TenantConfigContext.tsx decodes at runtime) here gives this
-// shell the tenant's real app name/theme color instead of the hardcoded
-// default. The favicon/apple-touch-icon hrefs stay fixed paths —
-// sync-tenant-branding.js overwrites the actual files at those paths
-// (public/favicon.png, public/icon-512.png) with the tenant's icon, so the
-// static filename is right and the bytes it serves are the tenant's, not
-// Expo's manifest field for this (which the static export doesn't consult
-// at all).
+// Runs once at static export time (never re-renders client-side), so read the tenant config
+// scripts/sync-tenant-branding.js baked in; that script also overwrites the favicon/icon files in place, so the fixed hrefs below always serve the tenant's icon.
 function readBakedConfig(): { appName?: string; shortName?: string; themeColor?: string } {
   const encoded = process.env.EXPO_PUBLIC_BAKED_TENANT_CONFIG;
   if (!encoded) return {};
@@ -32,11 +21,7 @@ function readBakedConfig(): { appName?: string; shortName?: string; themeColor?:
   }
 }
 
-// Expo Router's default root HTML document for the web build, with PWA tags
-// added: a manifest link + icons so the app is installable ("Add to Home
-// Screen" / desktop install), and theme-color/status-bar meta so the
-// installed window matches the tenant's own branding instead of a default
-// browser chrome color.
+// Default root HTML doc plus PWA tags (manifest/icons for installability, theme-color meta for tenant branding).
 export default function Root({ children }: PropsWithChildren) {
   const baked = readBakedConfig();
   const appName = baked.appName || "magic-visit-app";
@@ -60,10 +45,7 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content={shortName} />
 
-        {/* Disabling `overflow: hidden` on `body`/`html` breaks Android/iOS
-            scroll momentum on native, but web needs its own scroll
-            behavior, so this is web-only — same reasoning as Expo's own
-            default template. */}
+        {/* Web-only scroll reset; native handles scroll momentum differently (matches Expo's default template). */}
         <ScrollViewStyleReset />
       </head>
       <body>{children}</body>

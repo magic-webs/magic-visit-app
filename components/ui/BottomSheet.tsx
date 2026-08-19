@@ -48,12 +48,10 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
           <Pressable style={styles.backdropPressable} onPress={onClose} />
         </Animated.View>
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
-          {/* Drag Handle */}
           <View className="items-center py-3">
             <View className="h-1 w-10 rounded-full bg-brand-gold-border" />
           </View>
 
-          {/* Header */}
           <View className="flex-row items-center justify-between border-b border-brand-gold-100 px-5 pb-3">
             <AppText className="font-sans-bold text-lg text-[#1c1c1e]">{title ?? "Filters"}</AppText>
             <Pressable onPress={onClose} className="h-8 w-8 items-center justify-center rounded-full bg-brand-gold-100">
@@ -61,7 +59,6 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
             </Pressable>
           </View>
 
-          {/* Content */}
           <View>{children}</View>
         </Animated.View>
       </View>

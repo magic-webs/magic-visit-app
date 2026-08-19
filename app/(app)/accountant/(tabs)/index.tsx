@@ -19,12 +19,7 @@ function formatDiscount(type: string, value: number) {
   return type === "percentage" ? `${value}%` : `₹${value.toLocaleString("en-IN")}`;
 }
 
-// Accountant-initiated discount flow, step 1: find the customer's current
-// visit at this branch by their mobile number, then either apply their
-// prime-member preset instantly, or send a regular discount for the branch
-// manager to authorize (see discounts/[discountId] for that rest of the
-// flow). Deliberately no salesperson request queue anymore — see
-// instant.perms.ts/discountRequests.
+// Deliberately no salesperson request queue anymore — see instant.perms.ts/discountRequests.
 export default function ApplyDiscountScreen() {
   const session = useSession();
   const router = useRouter();

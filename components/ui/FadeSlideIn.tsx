@@ -3,9 +3,7 @@ import type { ReactNode } from "react";
 import type { ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, Easing } from "react-native-reanimated";
 
-// Reusable fade + slide-up entrance, used across dashboards/profile for a
-// consistent feel with the login screen's card animation. Style-only
-// Animated.View (no className) — see Button.tsx for why.
+// Shared fade + slide-up entrance for dashboards/profile, matching the login screen's card animation.
 export function FadeSlideIn({
   children,
   delay = 0,

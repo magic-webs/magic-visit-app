@@ -1,17 +1,15 @@
 import type { Theme } from "expo-router";
 
-// Raw values are also defined in ./theme.js (tailwind.config.js requires
-// that CJS file directly — mixing that with a TS import here ran into
-// CommonJS/ESM interop issues under allowJs, so the small, static palette is
-// just restated natively here instead of fighting that).
+// Also defined in ./theme.js (restated here rather than imported — mixing a
+// TS import with tailwind.config.js's require() of that CJS file hit
+// CommonJS/ESM interop issues under allowJs).
 export const theme = {
   teal: {
     DEFAULT: "#097969",
     hover: "#0a9070",
     light: "#0bb885",
-    // The 3D-lip color behind a primary Button's face (see
-    // components/ui/Button.tsx) — mutated in place by
-    // applyResolvedBrandColors() below, same as the other teal shades.
+    // Button's 3D-lip color (components/ui/Button.tsx) — mutated in place
+    // by applyResolvedBrandColors() below, same as the other teal shades.
     edge: "#065c50",
   },
   gold: {
@@ -34,38 +32,22 @@ export const theme = {
     offline: "#9ca3af",
   },
   gradients: {
-    // A mutable (not `as const`) 3-tuple — still shaped like a tuple (so
-    // GradientView's `colors` prop, which requires at least 2 elements,
-    // still type-checks) but with elements applyResolvedBrandColors() below
-    // can reassign in place once a tenant's theme resolves.
+    // Typed as a mutable 3-tuple (not `as const`) so applyResolvedBrandColors
+    // below can reassign elements in place while still satisfying
+    // GradientView's `colors` prop (which requires at least 2 elements).
     primary: ["#097969", "#0a9070", "#0bb885"] as [string, string, string],
     gold: ["#fdf8ed", "#faf0d0", "#f5e8b8"] as const,
   },
 };
 
-// `theme.teal`/`theme.gradients.primary` are read directly (not through a
-// Tailwind class) by ~25 files across the app — icon tints, FAB backgrounds,
-// tab-bar active color, activity indicators, skeleton banners, and more —
-// places a CSS-variable-based fix (see tailwind.config.js) can't reach,
-// since those are plain object-property reads, not `className` strings.
-// Rather than hand-edit every one of those call sites, this function
-// mutates the shared `theme` object in place once the tenant's resolved
-// brand is known (see contexts/TenantConfigContext.tsx) — every consumer
-// re-reads `theme.teal.DEFAULT` fresh on its next render, so they all pick
-// up the new color for free. This makes `theme` a mutable, tenant-aware
-// singleton rather than a pure constant; a deliberate, contained trade-off
-// given how broadly it's imported by direct property access rather than via
-// props/hooks. For today's single migrated tenant this is a no-op (the
-// resolved brand starts out equal to these same hardcoded values).
-//
-// Crucial caveat this mutation trick does NOT cover: anything that reads
-// `theme.teal.*`/`theme.gold.*` into a plain object *at module load time*
-// (e.g. a top-level `const X = { color: theme.teal.DEFAULT }`) captures
-// today's string value once and never sees later mutations — only a read
-// that happens fresh inside a function body (a render, or a function called
-// per-render) stays live. ROLE_STYLES below is built this way — as a
-// function, not a frozen object — specifically to avoid that trap; see its
-// own comment.
+// `theme.teal`/`theme.gradients.primary` are read directly (not via a
+// Tailwind class) by ~25 files, so a CSS-variable fix can't reach them; this
+// mutates the shared `theme` object in place once the tenant's brand
+// resolves, and every consumer picks it up on its next render. Makes `theme`
+// a mutable, tenant-aware singleton rather than a pure constant.
+// Caveat: only a read inside a function body (render-time) stays live — a
+// plain object built at module load (e.g. `const x = { c: theme.teal.DEFAULT }`)
+// captures the value once and never sees later mutations. See ROLE_STYLES below.
 export function applyResolvedBrandColors(colors: {
   primary: string;
   hover: string;
@@ -113,13 +95,9 @@ export const DISCOUNT_STATUS_STYLES: Record<DiscountRequestStatus, { color: stri
 
 export type StaffRole = "owner" | "branch_manager" | "receptionist" | "salesperson" | "accountant";
 
-// A function, not a frozen top-level object — `owner`/`branch_manager`/
-// `accountant` reference the mutable `theme.teal`/`theme.gold` shades (see
-// applyResolvedBrandColors' comment above on why a plain object here would
-// permanently freeze in whatever tenant happened to be active at module
-// load, usually the hardcoded default). Called fresh inside each consumer's
-// render (see components/identity/RoleBadge.tsx) so it always reflects the
-// signed-in tenant's current brand.
+// A function, not a frozen object, so `owner`/`branch_manager`/`accountant`
+// re-read the mutable `theme.teal`/`theme.gold` shades fresh on each call
+// (see applyResolvedBrandColors above) instead of freezing at module load.
 export function getRoleStyles(): Record<StaffRole, { color: string; label: string }> {
   return {
     owner: { color: theme.teal.DEFAULT, label: "Owner" },
@@ -150,11 +128,9 @@ export const AppNavigationTheme: Theme = {
   fonts,
 };
 
-// Tenant-driven counterpart to the static AppNavigationTheme above — same
-// shape, but `primary`/`background`/`border` come from the signed-in
-// tenant's resolved brand (see contexts/TenantConfigContext.tsx) instead of
-// the hardcoded Urmil Jewellers values. `card`/`text`/`notification` stay
-// fixed regardless of tenant, same as AppNavigationTheme.
+// Tenant-driven counterpart to AppNavigationTheme above — `primary`/
+// `background`/`border` come from the signed-in tenant's resolved brand
+// instead of the hardcoded defaults; `card`/`text`/`notification` stay fixed.
 export function buildNavigationTheme(navigation: { primary: string; background: string; border: string }): Theme {
   return {
     dark: false,

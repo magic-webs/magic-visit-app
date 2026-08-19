@@ -3,9 +3,7 @@ import { SelectField } from "@/components/ui/SelectField";
 import { AvailabilityDot } from "@/components/identity/AvailabilityDot";
 import { useSession } from "@/contexts/SessionContext";
 
-// Mirrors the source app's scoping: a receptionist only sees salespersons
-// explicitly assigned to them; manager/owner see every salesperson in the
-// branch. Availability is shown live via AvailabilityDot.
+// Receptionists only see salespersons assigned to them; manager/owner see every salesperson in the branch.
 export function SalespersonPicker({
   value,
   onChange,
