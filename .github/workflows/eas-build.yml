@@ -41,18 +41,46 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install eas-cli
+        run: bun add -g eas-cli
+
+      - name: Ensure EAS project exists
+        id: eas_project
+        # app.config.js no longer hardcodes a projectId — the old one
+        # belonged to an Expo account EXPO_TOKEN couldn't read, so every
+        # build 403'd before it started. `eas init --force` creates a
+        # project under whichever account EXPO_TOKEN authenticates as, or
+        # re-links to one it already owns with a matching slug — idempotent,
+        # safe to run every build. Its id feeds into .env below as
+        # EAS_PROJECT_ID.
+        run: |
+          result=$(eas init --non-interactive --force --json)
+          echo "$result"
+          id=$(echo "$result" | jq -r '.id // .project.id // empty')
+          if [ -z "$id" ]; then
+            echo "::error::Couldn't find a project id in 'eas init --json' output above — its shape may have changed."
+            exit 1
+          fi
+          echo "Using EAS project $id"
+          echo "project_id=$id" >> "$GITHUB_OUTPUT"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
       - name: Write base .env
         # EXPO_PUBLIC_* vars get inlined into the JS bundle at build time —
         # they need to exist here (not just in process.env) because that's
         # what Expo's own env-loading reads when `eas build` evaluates
         # app.config.js on its remote build machine, and `.env` isn't
         # excluded by .easignore, so it travels with the uploaded project
-        # archive.
+        # archive. EAS_PROJECT_ID isn't EXPO_PUBLIC_-prefixed (it's build
+        # config, never shipped in the JS bundle) but rides along the same
+        # way for app.config.js's own `extra.eas` field.
         run: |
           cat > .env <<EOF
           EXPO_PUBLIC_INSTANT_APP_ID=${{ secrets.INSTANT_APP_ID }}
           EXPO_PUBLIC_AUTH_BRIDGE_URL=${{ secrets.AUTH_BRIDGE_URL }}
           EXPO_PUBLIC_TENANT_SLUG=${{ inputs.tenant_slug }}
+          EAS_PROJECT_ID=${{ steps.eas_project.outputs.project_id }}
           EOF
 
       - name: Sync tenant branding (APP_NAME / NOTIFICATION_COLOR)
@@ -60,9 +88,6 @@ jobs:
         env:
           EXPO_PUBLIC_AUTH_BRIDGE_URL: ${{ secrets.AUTH_BRIDGE_URL }}
           EXPO_PUBLIC_TENANT_SLUG: ${{ inputs.tenant_slug }}
-
-      - name: Install eas-cli
-        run: bun add -g eas-cli
 
       - name: Build
         run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --wait

@@ -92,8 +92,15 @@ module.exports = ({ config }) => ({
   },
   extra: {
     router: {},
-    eas: {
-      projectId: "a632e0c4-6902-4d37-a9ad-f8d6c2089102",
-    },
+    // No hardcoded projectId — the old one belonged to an Expo account
+    // EXPO_TOKEN couldn't access, so every CI build 403'd before it even
+    // started. eas-build.yml's "Ensure EAS project exists" step now runs
+    // `eas init` first, creating (or re-linking, by slug, if one already
+    // exists under that account) a project under whichever account
+    // EXPO_TOKEN authenticates as, and exports its id as EAS_PROJECT_ID —
+    // omit this whole block when that isn't set (local/manual builds) so
+    // `eas build` falls back to its own interactive project prompt instead
+    // of shipping a bogus id.
+    ...(process.env.EAS_PROJECT_ID && { eas: { projectId: process.env.EAS_PROJECT_ID } }),
   },
 });
