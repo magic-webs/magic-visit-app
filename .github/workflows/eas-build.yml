@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       tenant_slug:
-        description: "organizations.slug of the tenant to build (e.g. urmil-jewellers)"
+        description: "organizations.slug of the tenant to build (e.g. magic-visits)"
         required: true
       platform:
         description: "Target platform"
@@ -52,21 +52,27 @@ jobs:
         # excluded by .easignore, so it travels with the uploaded project
         # archive. EAS_PROJECT_ID isn't EXPO_PUBLIC_-prefixed (it's build
         # config, never shipped in the JS bundle) but rides along the same
-        # way for app.config.js's own `extra.eas` field — set as a repo
-        # Actions Variable (Settings > Secrets and variables > Actions >
-        # Variables), not hardcoded here. `eas init` can create a fresh EAS
-        # project, but hard-errors trying to write the id back into a
-        # dynamic app.config.js, so that has to be a one-time manual step
-        # (`eas init` locally, or use the project this workflow already
-        # created at https://expo.dev/accounts/magicwebsdeveloper/projects/urmil-jewellers-ramnagar)
+        # way for app.config.js's own `extra.eas` field — set once under
+        # Settings > Secrets and variables > Actions, either the Variables
+        # or Secrets tab (checks both below, since it isn't sensitive but
+        # it's easy to add it under the wrong one). `eas init` can create a
+        # fresh EAS project, but hard-errors trying to write the id back
+        # into a dynamic app.config.js, so that has to be a one-time manual
+        # step (`eas init` locally, or use the project this workflow
+        # already created at
+        # https://expo.dev/accounts/magicwebsdeveloper/projects/urmil-jewellers-ramnagar)
         # — not something re-derived on every CI run.
         run: |
           cat > .env <<EOF
           EXPO_PUBLIC_INSTANT_APP_ID=${{ secrets.INSTANT_APP_ID }}
           EXPO_PUBLIC_AUTH_BRIDGE_URL=${{ secrets.AUTH_BRIDGE_URL }}
           EXPO_PUBLIC_TENANT_SLUG=${{ inputs.tenant_slug }}
-          EAS_PROJECT_ID=${{ vars.EAS_PROJECT_ID }}
+          EAS_PROJECT_ID=${{ vars.EAS_PROJECT_ID || secrets.EAS_PROJECT_ID }}
           EOF
+          if [ -z "${{ vars.EAS_PROJECT_ID || secrets.EAS_PROJECT_ID }}" ]; then
+            echo "::error::EAS_PROJECT_ID isn't set as a repo Variable or Secret (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
 
       - name: Sync tenant branding (APP_NAME / NOTIFICATION_COLOR)
         run: node scripts/sync-tenant-branding.js
